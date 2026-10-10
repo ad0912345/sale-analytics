@@ -1,0 +1,61 @@
+11.11 Sale Analytics — Sprint Plan
+
+Project Goal
+
+Build a big data analytics application for a Manila-based online seller to analyze one million simulated 11.11 sale orders. The application will identify top-selling product categories, regional sales patterns, peak order hours, and cancellation rates, then present the findings in a Streamlit dashboard with an AI-generated sales briefing.
+
+User Stories and Acceptance Criteria
+
+1. Store Owner
+
+User story:As a store owner, I want to see total revenue, total orders, average order value, and cancellation rate so that I can evaluate the performance of the 11.11 sale.
+
+Acceptance criteria:
+
+1. The dashboard displays total revenue from delivered orders, total orders, average order value, and cancellation rate using the cleaned dataset.
+2. The dashboard displays revenue by product category and allows the user to filter the regional sales view by region.
+
+2. Marketing Team
+
+User story:As a marketing team member, I want to identify peak ordering hours and top-performing product categories so that I can improve the timing and targeting of future promotions.
+
+Acceptance criteria:
+
+1. The dashboard displays an hourly order chart that includes the November 11 midnight and evening sale spikes.
+2. The category summary ranks product categories by delivered-order revenue and can be exported as a CSV file.
+
+3. Delivery Partner
+
+User story:As a delivery partner, I want to understand order volumes by region and COD cancellation patterns so that I can plan delivery capacity and reduce avoidable failed deliveries.
+
+Acceptance criteria:
+
+1. The analysis reports order counts by region and cancellation rates by payment method, including COD.
+2. The report identifies regions with high order volumes and presents cancellation findings without automatically excluding COD customers.
+
+Task Backlog
+
+| Task | Description                                                       | Status |
+| ---- | ----------------------------------------------------------------- | ------ |
+| A1   | Create the project plan and user stories                          | Done   |
+| A2   | Set up Google Colab and install PySpark                           | Done   |
+| B1   | Generate one million simulated November 11 orders                 | To Do  |
+| B2   | Inject dirty data and save CSV and Parquet files                  | To Do  |
+| C1   | Clean duplicates, regions, prices, quantities, and missing values | To Do  |
+| C2   | Record row counts and explain cleaning decisions                  | To Do  |
+| D1   | Perform five required analytics using PySpark                     | To Do  |
+| D2   | Compare pandas and PySpark execution times                        | To Do  |
+| D3   | Export summary CSV files to `results/`                            | To Do  |
+| E1   | Build the Streamlit dashboard and region filter                   | To Do  |
+| F1   | Integrate Gemini briefing with secure secrets and error handling  | To Do  |
+| G1   | Deploy the dashboard to Streamlit Community Cloud                 | To Do  |
+| H1   | Complete the ethics and emerging technology reflection            | To Do  |
+| S1   | Test the app, update the README, and record the demonstration     | To Do  |
+
+Definition of Done
+
+* All required analysis results are generated and exported.
+* The Streamlit dashboard displays the required KPIs and charts, with a working region filter.
+* The Gemini briefing uses supplied analysis results, and API failures are handled gracefully.
+* The project is pushed to the public GitHub repository without the million-row dataset or exposed API keys.
+* The deployment URL, Colab notebook link, and short screen recording are ready for submission.
