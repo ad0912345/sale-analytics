@@ -371,4 +371,3 @@ st.caption(
     "11.11 Sale Analytics | Big Data Analytics Project | "
     "Dashboard uses aggregated CSV summaries."
 )
-```
