@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from google import genai
 
 st.set_page_config(
 page_title="11.11 Sale Analytics",
@@ -23,7 +22,7 @@ return revenue, hourly, region, cancellation, aov
 try:
 revenue, hourly, region, cancellation, aov = load_data()
 except Exception as e:
-st.error("Hindi ma-load ang CSV files.")
+st.error("Unable to load results CSV files.")
 st.code(str(e))
 st.stop()
 
@@ -72,7 +71,7 @@ required = [
 
 for dataframe, columns in required:
 if any(column is None for column in columns):
-st.error("May kulang o hindi tugmang column sa CSV files.")
+st.error("A required column is missing from a results CSV.")
 st.write("Available columns:", dataframe.columns.tolist())
 st.stop()
 
@@ -210,10 +209,12 @@ region_view[region_col].astype(str) == selected_region
 st.dataframe(region_view, use_container_width=True)
 
 region_kpi1, region_kpi2 = st.columns(2)
+
 region_kpi1.metric(
 "Selected Region Revenue",
 format_peso(region_view[region_revenue_col].sum())
 )
+
 region_kpi2.metric(
 "Selected Region Orders",
 f"{region_view[region_count_col].sum():,.0f}"
@@ -224,71 +225,6 @@ st.dataframe(cancellation, use_container_width=True)
 
 st.divider()
 
-st.subheader("🤖 AI Sales Briefing")
-
-if st.button("Generate AI Briefing", type="primary"):
-try:
-api_key = st.secrets.get("GEMINI_API_KEY", "")
-
-```
-    if not api_key:
-        st.error("Idagdag ang GEMINI_API_KEY sa Streamlit Secrets.")
-    else:
-        client = genai.Client(api_key=api_key)
-
-        prompt = f"""
-```
-
-You are a business data analyst for a Manila online seller's 11.11 sale.
-
-Use only the summary data below. Do not invent facts or numbers.
-
-Revenue by category:
-{revenue.to_string(index=False)}
-
-Orders by hour:
-{hourly.to_string(index=False)}
-
-Regional summary:
-{region.to_string(index=False)}
-
-Cancellation by payment method:
-{cancellation.to_string(index=False)}
-
-Average order value:
-{aov.to_string(index=False)}
-
-Write exactly 5 sentences:
-
-1. Summarize sales performance.
-2. Identify the strongest category if supported by the data.
-3. Describe the hourly order pattern if supported by the data.
-4. Mention a regional or payment-method insight if supported by the data.
-5. Give one specific, actionable recommendation for next year's 11.11 sale.
-
-Be concise. Use only the supplied data.
-"""
-
-```
-        with st.spinner("Generating AI briefing..."):
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=prompt
-            )
-
-        if response.text:
-            st.success("AI briefing generated!")
-            st.write(response.text)
-        else:
-            st.warning("Walang text na naibalik ng AI.")
-
-except Exception as e:
-    st.error("Hindi nagawa ang AI briefing.")
-    st.write("Error type:", type(e).__name__)
-    st.code(str(e))
-```
-
-st.divider()
 st.caption(
 "11.11 Sale Analytics | Big Data Analytics Project"
 )
