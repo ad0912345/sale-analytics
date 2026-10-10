@@ -15,6 +15,7 @@ st.caption("Manila Online Seller | November 11 Sale")
 
 RESULTS_DIR = "results"
 
+
 @st.cache_data
 def load_results():
     revenue = pd.read_csv(
@@ -32,7 +33,9 @@ def load_results():
     aov = pd.read_csv(
         os.path.join(RESULTS_DIR, "aov_summary.csv")
     )
+
     return revenue, hourly, regions, cancellations, aov
+
 
 try:
     revenue, hourly, regions, cancellations, aov = load_results()
@@ -41,15 +44,19 @@ try:
     total_orders = int(regions["order_count"].sum())
     total_cancelled = int(cancellations["cancelled_orders"].sum())
     total_payment_orders = int(cancellations["total_orders"].sum())
+
     cancellation_rate = (
         total_cancelled / total_payment_orders * 100
         if total_payment_orders else 0
     )
+
     average_order_value = float(
         aov["average_order_value"].iloc[0]
     )
 
+    # Key performance indicators
     st.subheader("Key Performance Indicators")
+
     c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("Delivered Revenue", f"₱{total_revenue:,.2f}")
@@ -59,6 +66,7 @@ try:
 
     st.divider()
 
+    # Charts
     left, right = st.columns(2)
 
     with left:
@@ -74,11 +82,14 @@ try:
         )
 
     st.divider()
+
+    # Regional performance and filter
     st.subheader("Regional Performance")
 
     available_regions = sorted(
         regions["region"].dropna().unique().tolist()
     )
+
     selected_regions = st.multiselect(
         "Filter regions",
         options=available_regions,
@@ -89,52 +100,88 @@ try:
         regions["region"].isin(selected_regions)
     ]
 
-    st.dataframe(filtered_regions, use_container_width=True)
+    st.dataframe(
+        filtered_regions,
+        width="stretch"
+    )
 
     st.subheader("Cancellation Rate by Payment Method")
-    st.dataframe(cancellations, use_container_width=True)
-    
+    st.dataframe(
+        cancellations,
+        width="stretch"
+    )
+
+    # Gemini AI briefing
     st.divider()
     st.subheader("🤖 AI Sales Briefing")
 
+    st.caption(
+        "Generate a five-sentence analysis and a recommendation "
+        "based on the available sales summaries."
+    )
+
     if st.button("Generate AI Briefing"):
         try:
-            client = genai.Client(
-                api_key=st.secrets["GEMINI_API_KEY"]
-            )
+            api_key = st.secrets.get("GEMINI_API_KEY")
 
-            prompt = f"""
+            if not api_key:
+                st.error(
+                    "GEMINI_API_KEY is missing. "
+                    "Add it in Streamlit Manage app → Settings → Secrets."
+                )
+            else:
+                client = genai.Client(api_key=api_key)
+
+                prompt = f"""
 You are an analytics assistant for a Manila online seller's
 November 11 sale.
+
 Use only the summary numbers below. Do not invent facts or figures.
-Write exactly 5 sentences and include one actionable
-recommendation for next year's sale.
+Write exactly five sentences. Include one actionable recommendation
+for next year's sale. Clearly distinguish observations from
+recommendations. Do not claim that correlation proves causation.
 
 Delivered revenue: ₱{total_revenue:,.2f}
 Total orders: {total_orders}
 Cancellation rate: {cancellation_rate:.2f}%
 Average order value: ₱{average_order_value:,.2f}
 
-Revenue by category: {revenue.to_dict(orient="records")}
-Orders by hour: {hourly.to_dict(orient="records")}
-Regional summary: {filtered_regions.to_dict(orient="records")}
-Cancellation by payment method: {cancellations.to_dict(orient="records")}
+Revenue by category:
+{revenue.to_dict(orient="records")}
+
+Orders by hour:
+{hourly.to_dict(orient="records")}
+
+Regional summary (filtered regions):
+{filtered_regions.to_dict(orient="records")}
+
+Cancellation by payment method:
+{cancellations.to_dict(orient="records")}
 """
 
-            with st.spinner("Generating AI briefing..."):
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=prompt
-                )
+                with st.spinner("Generating AI briefing..."):
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt
+                    )
 
-            st.write(response.text)
+                if response.text:
+                    st.success("AI briefing generated successfully!")
+                    st.write(response.text)
+                else:
+                    st.warning(
+                        "Gemini returned an empty response. "
+                        "Please try again."
+                    )
 
-        except Exception:
-            st.error(
-                "AI briefing could not be generated. "
-                "Please check your Gemini API key in Streamlit secrets."
-            )
+        except Exception as e:
+            st.error("AI briefing could not be generated.")
+            st.write("Error type:", type(e).__name__)
+            st.code(str(e))
 
 except Exception as e:
-    st.error("Unable to load the results. Please check the CSV files in results/.")
+    st.error(
+        "Unable to load the results. "
+        "Please check the CSV files in the results/ folder."
+    )
     st.code(str(e))
