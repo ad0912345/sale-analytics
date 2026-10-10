@@ -1,0 +1,5 @@
+payment_method,total_orders,cancelled_orders,cancellation_rate_pct
+COD,395940,78895,19.93
+Maya,198165,12016,6.06
+Card,98669,5932,6.01
+GCash,296322,17775,6.0
